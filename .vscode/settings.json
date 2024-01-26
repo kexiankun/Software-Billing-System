@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "evp.h": "c",
+        "sqlite3.h": "c",
+        "psapi.h": "c"
+    }
+}
