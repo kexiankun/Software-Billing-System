@@ -6,26 +6,26 @@
 #include <string.h>
 #include <locale.h>
 
-// ÉùÃ÷ SQLite Êı¾İ¿âÁ¬½Ó
+// å£°æ˜ SQLite æ•°æ®åº“è¿æ¥
 sqlite3 *db;
 
-// ·¢ËÍÏûÏ¢¸ø·şÎñÆ÷µÄº¯Êı
+// å‘é€æ¶ˆæ¯ç»™æœåŠ¡å™¨çš„å‡½æ•°
 void sendMessage(TCPsocket socket, const char *message) {
-    int messageLength = strlen(message) + 1;  // °üÀ¨×Ö·û´®½áÊø·û'\0'
+    int messageLength = strlen(message) + 1;  // åŒ…æ‹¬å­—ç¬¦ä¸²ç»“æŸç¬¦'\0'
 
     if (SDLNet_TCP_Send(socket, message, messageLength) < messageLength) {
         fprintf(stderr, "SDLNet_TCP_Send: %s\n", SDLNet_GetError());
     }
 }
 
-// ·¢ËÍÕûÊı¸ø·şÎñÆ÷µÄº¯Êı
+// å‘é€æ•´æ•°ç»™æœåŠ¡å™¨çš„å‡½æ•°
 void sendInt(TCPsocket socket, int value) {
     if (SDLNet_TCP_Send(socket, &value, sizeof(value)) < sizeof(value)) {
         fprintf(stderr, "SDLNet_TCP_Send: %s\n", SDLNet_GetError());
     }
 }
 
-// ´Ó·şÎñÆ÷½ÓÊÕÏûÏ¢µÄº¯Êı
+// ä»æœåŠ¡å™¨æ¥æ”¶æ¶ˆæ¯çš„å‡½æ•°
 bool receiveMessage(TCPsocket socket, char *buffer, int bufferSize) {
     int bytesRead = SDLNet_TCP_Recv(socket, buffer, bufferSize);
     if (bytesRead <= 0) {
@@ -35,7 +35,7 @@ bool receiveMessage(TCPsocket socket, char *buffer, int bufferSize) {
     return true;
 }
 
-// Ö´ĞĞ²éÑ¯²Ù×÷£¬»ñÈ¡ÓÃ»§ID
+// æ‰§è¡ŒæŸ¥è¯¢æ“ä½œï¼Œè·å–ç”¨æˆ·ID
 int getUserIdByUsername(const char *username) {
     char sql[100];
     sprintf(sql, "SELECT id FROM users WHERE username='%s';", username);
@@ -44,262 +44,262 @@ int getUserIdByUsername(const char *username) {
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
 
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "ÎŞ·¨×¼±¸²éÑ¯Óï¾ä£º%s\n", sqlite3_errmsg(db));
-        return -1;  // ·µ»Ø¸ºÖµ±íÊ¾²éÑ¯Ê§°Ü
+        fprintf(stderr, "æ— æ³•å‡†å¤‡æŸ¥è¯¢è¯­å¥ï¼š%s\n", sqlite3_errmsg(db));
+        return -1;  // è¿”å›è´Ÿå€¼è¡¨ç¤ºæŸ¥è¯¢å¤±è´¥
     }
 
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_ROW) {
         int userId = sqlite3_column_int(stmt, 0);
         sqlite3_finalize(stmt);
-        return userId;  // ·µ»Ø²éÑ¯µ½µÄÓÃ»§ID
+        return userId;  // è¿”å›æŸ¥è¯¢åˆ°çš„ç”¨æˆ·ID
     } else if (rc == SQLITE_DONE) {
-        fprintf(stderr, "Î´ÕÒµ½Æ¥ÅäµÄÓÃ»§£º%s\n", username);
+        fprintf(stderr, "æœªæ‰¾åˆ°åŒ¹é…çš„ç”¨æˆ·ï¼š%s\n", username);
         sqlite3_finalize(stmt);
-        return -1;  // ·µ»Ø¸ºÖµ±íÊ¾²éÑ¯Ê§°Ü
+        return -1;  // è¿”å›è´Ÿå€¼è¡¨ç¤ºæŸ¥è¯¢å¤±è´¥
     } else {
-        fprintf(stderr, "²éÑ¯Ö´ĞĞÊ§°Ü£º%s\n", sqlite3_errmsg(db));
+        fprintf(stderr, "æŸ¥è¯¢æ‰§è¡Œå¤±è´¥ï¼š%s\n", sqlite3_errmsg(db));
         sqlite3_finalize(stmt);
-        return -1;  // ·µ»Ø¸ºÖµ±íÊ¾²éÑ¯Ê§°Ü
+        return -1;  // è¿”å›è´Ÿå€¼è¡¨ç¤ºæŸ¥è¯¢å¤±è´¥
     }
 }
 
-// ´¦Àí»ı·Ö³äÖµÂß¼­
+// å¤„ç†ç§¯åˆ†å……å€¼é€»è¾‘
 void handlePointsRecharge(TCPsocket client, int userId, int points) {
-    // ·¢ËÍ»ı·Ö³äÖµÇëÇó
+    // å‘é€ç§¯åˆ†å……å€¼è¯·æ±‚
     sendMessage(client, "RECHARGE_POINTS");
 
-    // Ìá¹©ÓÃ»§IDºÍ³äÖµ»ı·Ö
+    // æä¾›ç”¨æˆ·IDå’Œå……å€¼ç§¯åˆ†
     sendMessage(client, (char *)&userId);
     sendMessage(client, (char *)&points);
 
-    // ´Ó·şÎñÆ÷½ÓÊÕÒ»ÌõÏûÏ¢
+    // ä»æœåŠ¡å™¨æ¥æ”¶ä¸€æ¡æ¶ˆæ¯
     char response[512];
     if (receiveMessage(client, response, sizeof(response))) {
-        // ÅĞ¶ÏÊÇ·ñ»ı·Ö³äÖµ³É¹¦
+        // åˆ¤æ–­æ˜¯å¦ç§¯åˆ†å……å€¼æˆåŠŸ
         if (strstr(response, "RECHARGE_POINTS_SUCCESS")) {
             int userPoints;
             sscanf(response, "RECHARGE_POINTS_SUCCESS,%d", &userPoints);
-            printf("»ı·Ö³äÖµ³É¹¦£¡µ±Ç°»ı·Ö£º%d\n", userPoints);
-            // ÔÚÕâÀïÌí¼Ó´¦Àí»ı·Ö³äÖµ³É¹¦ºóµÄÂß¼­
+            printf("ç§¯åˆ†å……å€¼æˆåŠŸï¼å½“å‰ç§¯åˆ†ï¼š%d\n", userPoints);
+            // åœ¨è¿™é‡Œæ·»åŠ å¤„ç†ç§¯åˆ†å……å€¼æˆåŠŸåçš„é€»è¾‘
         } else if (strcmp(response, "RECHARGE_POINTS_FAIL") == 0) {
-            printf("»ı·Ö³äÖµÊ§°Ü¡£\n");
-            // ÔÚÕâÀïÌí¼Ó´¦Àí»ı·Ö³äÖµÊ§°ÜºóµÄÂß¼­
+            printf("ç§¯åˆ†å……å€¼å¤±è´¥ã€‚\n");
+            // åœ¨è¿™é‡Œæ·»åŠ å¤„ç†ç§¯åˆ†å……å€¼å¤±è´¥åçš„é€»è¾‘
         }
 
-        // ÆäËûÏìÓ¦µÄÅĞ¶Ï
+        // å…¶ä»–å“åº”çš„åˆ¤æ–­
         // ...
     } else {
-        // ´¦Àí½ÓÊÕÏûÏ¢Ê§°ÜµÄÇé¿ö
-        printf("½ÓÊÕ·şÎñÆ÷ÏìÓ¦Ê§°Ü¡£\n");
+        // å¤„ç†æ¥æ”¶æ¶ˆæ¯å¤±è´¥çš„æƒ…å†µ
+        printf("æ¥æ”¶æœåŠ¡å™¨å“åº”å¤±è´¥ã€‚\n");
     }
 }
 
 
 
-int gouka() {
+int purchaseACard() {
 
-   // setlocale(LC_ALL, "");  // ÉèÖÃ±¾µØ»¯Ö§³Ö£¬ÒÔÖ§³ÖÖĞÎÄÊäÈë
+   // setlocale(LC_ALL, "");  // è®¾ç½®æœ¬åœ°åŒ–æ”¯æŒï¼Œä»¥æ”¯æŒä¸­æ–‡è¾“å…¥
 
-    // ³õÊ¼»¯SDL2_net
+    // åˆå§‹åŒ–SDL2_net
     SDLNet_Init();
 
-    // ÉèÖÃÔ¶³ÌÊı¾İ¿â·şÎñÆ÷IPºÍ¶Ë¿Ú
+    // è®¾ç½®è¿œç¨‹æ•°æ®åº“æœåŠ¡å™¨IPå’Œç«¯å£
     IPaddress ip;
-    SDLNet_ResolveHost(&ip, "127.0.0.1", 8989);  // ÇëÌæ»»³ÉÔ¶³ÌÊı¾İ¿â·şÎñÆ÷µÄIPºÍ¶Ë¿Ú
+    SDLNet_ResolveHost(&ip, "127.0.0.1", 8989);  // è¯·æ›¿æ¢æˆè¿œç¨‹æ•°æ®åº“æœåŠ¡å™¨çš„IPå’Œç«¯å£
 while (1)
 {
-    // ´ò¿ª¿Í»§¶ËÌ×½Ó×Ö
+    // æ‰“å¼€å®¢æˆ·ç«¯å¥—æ¥å­—
     TCPsocket client = SDLNet_TCP_Open(&ip);
     if (!client) {
         fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError());
         return 1;
     }
 
-    // ³õÊ¼»¯Êı¾İ¿âÁ¬½Ó
+    // åˆå§‹åŒ–æ•°æ®åº“è¿æ¥
     int rc = sqlite3_open("user_data.db", &db);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "ÎŞ·¨´ò¿ªÊı¾İ¿â£º%s\n", sqlite3_errmsg(db));
+        fprintf(stderr, "æ— æ³•æ‰“å¼€æ•°æ®åº“ï¼š%s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         return 1;
     }
 
-    // Í¨¹ıÓÃ»§Ãû»ñÈ¡ÓÃ»§ID
+    // é€šè¿‡ç”¨æˆ·åè·å–ç”¨æˆ·ID
 char usernameToQuery[50];
 
-printf("ÊäÈëÓÃ»§Ãû: ");
+printf("è¾“å…¥ç”¨æˆ·å: ");
 scanf("%s", usernameToQuery);
 
 int userId = getUserIdByUsername(usernameToQuery);
 
 if (userId != -1) {
-    printf("ÓÃ»§ '%s' µÄÎ¨Ò»±êÊ¶·ûÊÇ£º%d\n", usernameToQuery, userId);
+    printf("ç”¨æˆ· '%s' çš„å”¯ä¸€æ ‡è¯†ç¬¦æ˜¯ï¼š%d\n", usernameToQuery, userId);
 
-      // Àı×Ó£º¹ºÂòÒ»ÕÅ¿¨
+      // ä¾‹å­ï¼šè´­ä¹°ä¸€å¼ å¡
         sendMessage(client, "BUY_CARD");
 
-        // Ìá¹©ÓÃ»§ID¡¢¿¨ÀàĞÍºÍÊ±³¤
+        // æä¾›ç”¨æˆ·IDã€å¡ç±»å‹å’Œæ—¶é•¿
         sendInt(client, userId);
         
-        char cardType[10] = "seasonal";  // Ìæ»»ÎªÊµ¼ÊµÄ¿¨ÀàĞÍ dayÌì¿¨ weekÖÜ¿¨ 
+        char cardType[10] = "seasonal";  // æ›¿æ¢ä¸ºå®é™…çš„å¡ç±»å‹ dayå¤©å¡ weekå‘¨å¡ 
         sendMessage(client, cardType);
        
-        int duration = 7776000;  // Ìæ»»ÎªÊµ¼ÊµÄÊ±³¤ 
-        //Ò»Ìì°üº¬ 86,400 Ãë       daily
-        //Ò»ÖÜ°üº¬ 604,800 Ãë      weekly
-        //Ò»ÔÂ°üº¬ 2,592,000Ãë     monthly
-        //Ò»¼¾°üº¬ 7,776,000Ãë     seasonal
-        //Ò»Äê°üº¬ 31,536,000Ãë    yearly
+        int duration = 7776000;  // æ›¿æ¢ä¸ºå®é™…çš„æ—¶é•¿ 
+        //ä¸€å¤©åŒ…å« 86,400 ç§’       daily
+        //ä¸€å‘¨åŒ…å« 604,800 ç§’      weekly
+        //ä¸€æœˆåŒ…å« 2,592,000ç§’     monthly
+        //ä¸€å­£åŒ…å« 7,776,000ç§’     seasonal
+        //ä¸€å¹´åŒ…å« 31,536,000ç§’    yearly
 
         sendMessage(client, (char *)&duration);
  //getchar();
-// ´Ó·şÎñÆ÷½ÓÊÕ¹ºÂò¿¨µÄÏìÓ¦ÏûÏ¢
+// ä»æœåŠ¡å™¨æ¥æ”¶è´­ä¹°å¡çš„å“åº”æ¶ˆæ¯
 char response[512];
 if (receiveMessage(client, response, sizeof(response))) {
-    // ÅĞ¶Ï¹ºÂò¿¨µÄÏìÓ¦ÀàĞÍ
+    // åˆ¤æ–­è´­ä¹°å¡çš„å“åº”ç±»å‹
     char *token = strtok(response, ",");
     if (token != NULL) {
-        // ¸ù¾İÏìÓ¦ÀàĞÍ½øĞĞ´¦Àí
+        // æ ¹æ®å“åº”ç±»å‹è¿›è¡Œå¤„ç†
         if (strcmp(token, "BUY_CARD_SUCCESS") == 0) {
-            // ÌáÈ¡¸üĞÂºóµÄ»ı·Ö
+            // æå–æ›´æ–°åçš„ç§¯åˆ†
             token = strtok(NULL, ",");
             if (token != NULL) {
                 int updatedPoints = atoi(token);
-                printf("¹ºÂò¿¨³É¹¦£¡¸üĞÂºóµÄ»ı·Ö£º%d\n", updatedPoints);
+                printf("è´­ä¹°å¡æˆåŠŸï¼æ›´æ–°åçš„ç§¯åˆ†ï¼š%d\n", updatedPoints);
                 
             } else {
-                printf("¹ºÂò¿¨³É¹¦£¬µ«Î´ÄÜÌáÈ¡¸üĞÂºóµÄ»ı·Ö¡£\n");
+                printf("è´­ä¹°å¡æˆåŠŸï¼Œä½†æœªèƒ½æå–æ›´æ–°åçš„ç§¯åˆ†ã€‚\n");
                 
             }
         } else if (strcmp(token, "BUY_CARD_INSUFFICIENT_POINTS") == 0) {
-            printf("¹ºÂò¿¨Ê§°Ü¡£»ı·Ö²»×ã¡£\n");
+            printf("è´­ä¹°å¡å¤±è´¥ã€‚ç§¯åˆ†ä¸è¶³ã€‚\n");
          
         } else if (strcmp(token, "BUY_CARD_FAIL") == 0) {
-            printf("¹ºÂò¿¨Ê§°Ü¡£\n");
+            printf("è´­ä¹°å¡å¤±è´¥ã€‚\n");
          
         }  else if (strcmp(token, "CARD_ALREADY_OWNED") == 0) {
-            printf("ÇëÎğÖØ¸´¹ºÂò\n");
+            printf("è¯·å‹¿é‡å¤è´­ä¹°\n");
             
         } else {
-            printf("Î´ÖªµÄ¹ºÂò¿¨ÏìÓ¦ÀàĞÍ£º%s\n", token);
+            printf("æœªçŸ¥çš„è´­ä¹°å¡å“åº”ç±»å‹ï¼š%s\n", token);
           
         }
     } else {
-        printf("ÎŞ·¨½âÎö¹ºÂò¿¨µÄÏìÓ¦ÏûÏ¢¡£\n");
+        printf("æ— æ³•è§£æè´­ä¹°å¡çš„å“åº”æ¶ˆæ¯ã€‚\n");
      
     }
 } else {
-    // ´¦Àí½ÓÊÕÏûÏ¢Ê§°ÜµÄÇé¿ö
-    printf("½ÓÊÕ¹ºÂò¿¨ÏìÓ¦ÏûÏ¢Ê§°Ü¡£\n");
+    // å¤„ç†æ¥æ”¶æ¶ˆæ¯å¤±è´¥çš„æƒ…å†µ
+    printf("æ¥æ”¶è´­ä¹°å¡å“åº”æ¶ˆæ¯å¤±è´¥ã€‚\n");
   
 }
 
     } else {
-        fprintf(stderr, "»ñÈ¡ÓÃ»§IDÊ§°Ü¡£\n");
+        fprintf(stderr, "è·å–ç”¨æˆ·IDå¤±è´¥ã€‚\n");
         
     }
-    // ¹Ø±ÕÊı¾İ¿âÁ¬½Ó
+    // å…³é—­æ•°æ®åº“è¿æ¥
     sqlite3_close(db);
-    // ¹Ø±Õ¿Í»§¶ËÌ×½Ó×Ö
+    // å…³é—­å®¢æˆ·ç«¯å¥—æ¥å­—
     SDLNet_TCP_Close(client);
 }
 
-    // ¹Ø±ÕSDL2_net
+    // å…³é—­SDL2_net
     SDLNet_Quit();
 
     return 0;
 }
 
 
-int jifen() {
+int integral() {
 
-   // setlocale(LC_ALL, "");  // ÉèÖÃ±¾µØ»¯Ö§³Ö£¬ÒÔÖ§³ÖÖĞÎÄÊäÈë
+   // setlocale(LC_ALL, "");  // è®¾ç½®æœ¬åœ°åŒ–æ”¯æŒï¼Œä»¥æ”¯æŒä¸­æ–‡è¾“å…¥
 
-    // ³õÊ¼»¯SDL2_net
+    // åˆå§‹åŒ–SDL2_net
     SDLNet_Init();
 
-    // ÉèÖÃÔ¶³ÌÊı¾İ¿â·şÎñÆ÷IPºÍ¶Ë¿Ú
+    // è®¾ç½®è¿œç¨‹æ•°æ®åº“æœåŠ¡å™¨IPå’Œç«¯å£
     IPaddress ip;
-    SDLNet_ResolveHost(&ip, "127.0.0.1", 8989);  // ÇëÌæ»»³ÉÔ¶³ÌÊı¾İ¿â·şÎñÆ÷µÄIPºÍ¶Ë¿Ú
+    SDLNet_ResolveHost(&ip, "127.0.0.1", 8989);  // è¯·æ›¿æ¢æˆè¿œç¨‹æ•°æ®åº“æœåŠ¡å™¨çš„IPå’Œç«¯å£
 while (1)
 {
     
 
 
-    // ´ò¿ª¿Í»§¶ËÌ×½Ó×Ö
+    // æ‰“å¼€å®¢æˆ·ç«¯å¥—æ¥å­—
     TCPsocket client = SDLNet_TCP_Open(&ip);
     if (!client) {
         fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError());
         return 1;
     }
 
-    // ³õÊ¼»¯Êı¾İ¿âÁ¬½Ó
+    // åˆå§‹åŒ–æ•°æ®åº“è¿æ¥
     int rc = sqlite3_open("user_data.db", &db);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "ÎŞ·¨´ò¿ªÊı¾İ¿â£º%s\n", sqlite3_errmsg(db));
+        fprintf(stderr, "æ— æ³•æ‰“å¼€æ•°æ®åº“ï¼š%s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         return 1;
     }
 
-    // Í¨¹ıÓÃ»§Ãû»ñÈ¡ÓÃ»§ID
+    // é€šè¿‡ç”¨æˆ·åè·å–ç”¨æˆ·ID
 char usernameToQuery[50];
 
-printf("ÊäÈëÓÃ»§Ãû: ");
+printf("è¾“å…¥ç”¨æˆ·å: ");
 scanf("%s", usernameToQuery);
 
 int userId = getUserIdByUsername(usernameToQuery);
 
 if (userId != -1) {
-    printf("ÓÃ»§ '%s' µÄÎ¨Ò»±êÊ¶·ûÊÇ£º%d\n", usernameToQuery, userId);
+    printf("ç”¨æˆ· '%s' çš„å”¯ä¸€æ ‡è¯†ç¬¦æ˜¯ï¼š%d\n", usernameToQuery, userId);
 
 /////////////////////////////////////////////////////////////////////////
 
-int rechargePoints; // Ö±½Ó¶¨ÒåÎªÕûÊı±äÁ¿
-// Àı×Ó£º»ı·Ö³äÖµ
-printf("ÊäÈë»ı·Ö: ");
-scanf("%d", &rechargePoints); // Ê¹ÓÃ &rechargePoints »ñÈ¡ÕûÊı±äÁ¿µÄµØÖ·
+int rechargePoints; // ç›´æ¥å®šä¹‰ä¸ºæ•´æ•°å˜é‡
+// ä¾‹å­ï¼šç§¯åˆ†å……å€¼
+printf("è¾“å…¥ç§¯åˆ†: ");
+scanf("%d", &rechargePoints); // ä½¿ç”¨ &rechargePoints è·å–æ•´æ•°å˜é‡çš„åœ°å€
 
-// ·¢ËÍ»ı·Ö³äÖµÇëÇó
+// å‘é€ç§¯åˆ†å……å€¼è¯·æ±‚
 sendMessage(client, "RECHARGE_POINTS");
 
-// Ìá¹©ÓÃ»§IDºÍ³äÖµ»ı·Ö
+// æä¾›ç”¨æˆ·IDå’Œå……å€¼ç§¯åˆ†
 sendInt(client, userId);
 SDLNet_TCP_Send(client,&rechargePoints,sizeof(rechargePoints));
 
 
-// ´Ó·şÎñÆ÷½ÓÊÕÒ»ÌõÏûÏ¢
+// ä»æœåŠ¡å™¨æ¥æ”¶ä¸€æ¡æ¶ˆæ¯
 char response[512];
 if (receiveMessage(client, response, sizeof(response))) {
-    // ÅĞ¶ÏÊÇ·ñ»ı·Ö³äÖµ³É¹¦
+    // åˆ¤æ–­æ˜¯å¦ç§¯åˆ†å……å€¼æˆåŠŸ
     if (strstr(response, "RECHARGE_POINTS_SUCCESS")) {
         int userPoints;
         sscanf(response, "RECHARGE_POINTS_SUCCESS,%d", &userPoints);
-        printf("»ı·Ö³äÖµ³É¹¦£¡µ±Ç°»ı·Ö£º%d\n", userPoints);
+        printf("ç§¯åˆ†å……å€¼æˆåŠŸï¼å½“å‰ç§¯åˆ†ï¼š%d\n", userPoints);
     } else if (strcmp(response, "RECHARGE_POINTS_FAIL") == 0) {
-        printf("»ı·Ö³äÖµÊ§°Ü¡£\n");
-        // ÔÚÕâÀïÌí¼Ó´¦Àí»ı·Ö³äÖµÊ§°ÜºóµÄÂß¼­
+        printf("ç§¯åˆ†å……å€¼å¤±è´¥ã€‚\n");
+        // åœ¨è¿™é‡Œæ·»åŠ å¤„ç†ç§¯åˆ†å……å€¼å¤±è´¥åçš„é€»è¾‘
     }
 
-    // ÆäËûÏìÓ¦µÄÅĞ¶Ï
+    // å…¶ä»–å“åº”çš„åˆ¤æ–­
     // ...
 } else {
-    // ´¦Àí½ÓÊÕÏûÏ¢Ê§°ÜµÄÇé¿ö
-    printf("½ÓÊÕ·şÎñÆ÷ÏìÓ¦Ê§°Ü¡£\n");
+    // å¤„ç†æ¥æ”¶æ¶ˆæ¯å¤±è´¥çš„æƒ…å†µ
+    printf("æ¥æ”¶æœåŠ¡å™¨å“åº”å¤±è´¥ã€‚\n");
 
 }
     } else {
-        fprintf(stderr, "»ñÈ¡ÓÃ»§IDÊ§°Ü¡£\n");
+        fprintf(stderr, "è·å–ç”¨æˆ·IDå¤±è´¥ã€‚\n");
         
     }
 
-    // ¹Ø±ÕÊı¾İ¿âÁ¬½Ó
+    // å…³é—­æ•°æ®åº“è¿æ¥
     sqlite3_close(db);
-    // ¹Ø±Õ¿Í»§¶ËÌ×½Ó×Ö
+    // å…³é—­å®¢æˆ·ç«¯å¥—æ¥å­—
     SDLNet_TCP_Close(client);
 }
 
 
-    // ¹Ø±ÕSDL2_net
+    // å…³é—­SDL2_net
     SDLNet_Quit();
 
     return 0;
@@ -308,9 +308,8 @@ if (receiveMessage(client, response, sizeof(response))) {
 
 int main(int argc, char *argv[]) {
 
-   jifen();
-
-   // gouka();
+   integral();//ç§¯åˆ†
+   // purchaseACard();//è´­å¡
 
     return  0;
 }
